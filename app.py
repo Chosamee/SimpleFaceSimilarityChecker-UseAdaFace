@@ -111,6 +111,7 @@ async def get_users_with_image(
     ids = []
     decoded_embeddeds = base64.b64decode(embeddeds)
     embs = pickle.loads(decoded_embeddeds)
+    print(embs)
     for idx, image in enumerate(files):
         image_bytes = await image.read()
         tensor_input = preprocess_and_align(image_bytes)
@@ -119,8 +120,8 @@ async def get_users_with_image(
         # 프로필 이미지 처리
         internal_id = image.filename.split(".")[0]
         ids.append(internal_id)
-        # embedded_profile = db.query(User).filter(User.internal_id == internal_id).first().embedded_profile
-
+        # embedded_profile = db.query(User).fil ter(User.internal_id == internal_id).first().embedded_profile
+        print(idx)
         if embs[idx] is not None:
             numpy_array = np.frombuffer(embs[idx], dtype=dtype).reshape(shape)
             # NumPy 배열을 PyTorch 텐서로 변환
