@@ -1,3 +1,5 @@
+import json
+import pickle
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, Request, Form
 import sys
 from requests import Session
@@ -11,7 +13,8 @@ from fastapi import File, UploadFile
 from PIL import Image
 import numpy as np
 import io
-from database import get_db
+
+# from database import get_db
 from face_alignment import align
 from inference import load_pretrained_model, to_input
 from user import *
@@ -29,7 +32,7 @@ from pathlib import Path
 app = FastAPI()
 
 model = load_pretrained_model("ir_50")  # 모델을 로드합니다.
-device = torch.device("cpu")  # ("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
 # "cuda:3"을 써야할 수도 있습니다. 할당된 디바이스를 잘 봐야합니다
 
 
@@ -61,7 +64,7 @@ def get_profile_image_embeddings(user_ids):
 
 
 @app.post("/profile_embedding")  # 프로필 임베딩을 가져오는 함수. 처음 프로필을 생성할때 한번씩 돌리는거
-async def profile_embedding(image: UploadFile = File(...), internal_id: str = Form(None), db=Depends(get_db)):
+async def profile_embedding(image: UploadFile = File(...), internal_id: str = Form(None)):
     image_bytes = await image.read()
     tensor_input = preprocess_and_align(image_bytes)
     if tensor_input is None:
@@ -74,6 +77,8 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
     """
     numpy_array = features.numpy()
     binary_data = numpy_array.tobytes()
+    return binary_data
+
     user = db.query(User).filter(User.internal_id == internal_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Not found User")
@@ -90,14 +95,18 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
 
 
 @app.post("/get_users_with_image")
-async def get_users_with_image(files: List[UploadFile] = File(...), db: Session = Depends(get_db)):
-    print("??")
-
+async def get_users_with_image(
+    files: List[UploadFile] = File(...),
+    ids_json: str = Form(...),
+    emb: bytes = Form(...),
+):
+    ids = json.loads(ids_json)
     # 업로드된 이미지 처리
     uploaded_tensor_inputs = []
     profile_embeddings = []
     ids = []
-    for image in files:
+    embs = pickle.loads(emb)
+    for idx, image in enumerate(files):
         image_bytes = await image.read()
         tensor_input = preprocess_and_align(image_bytes)
         if tensor_input is not None:
@@ -105,10 +114,10 @@ async def get_users_with_image(files: List[UploadFile] = File(...), db: Session 
         # 프로필 이미지 처리
         internal_id = image.filename.split(".")[0]
         ids.append(internal_id)
-        embedded_profile = db.query(User).filter(User.internal_id == internal_id).first().embedded_profile
+        # embedded_profile = db.query(User).filter(User.internal_id == internal_id).first().embedded_profile
         dtype = np.float32  # 원본 배열의 데이터 타입
         shape = (1, 512)  # 원본 배열의 모양
-        numpy_array = np.frombuffer(embedded_profile, dtype=dtype).reshape(shape)
+        numpy_array = np.frombuffer(embs[idx], dtype=dtype).reshape(shape)
 
         # NumPy 배열을 PyTorch 텐서로 변환
         tensor = torch.from_numpy(numpy_array)
