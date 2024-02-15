@@ -109,16 +109,19 @@ async def get_users_with_image(
     uploaded_tensor_inputs = []
     profile_embeddings = []
     ids = []
+    not_found = []
     decoded_embeddeds = base64.b64decode(embeddeds)
     embs = pickle.loads(decoded_embeddeds)
     print(embs)
     for idx, image in enumerate(files):
         image_bytes = await image.read()
         tensor_input = preprocess_and_align(image_bytes)
+        internal_id = image.filename.split(".")[0]
         if tensor_input is not None:
             uploaded_tensor_inputs.append(tensor_input)
+        else:
+            not_found.append(internal_id)
         # 프로필 이미지 처리
-        internal_id = image.filename.split(".")[0]
         ids.append(internal_id)
         # embedded_profile = db.query(User).fil ter(User.internal_id == internal_id).first().embedded_profile
         print(idx)
@@ -145,7 +148,13 @@ async def get_users_with_image(
 
     # 결과 매핑
     results = [
-        {"uploaded_image_index": i, "matched_user_id": ids[idx]} for i, idx in enumerate(most_similar_indices.tolist())
+        {
+            "uploaded_image_name": files[i].filename,
+            "uploaded_image_index": i,
+            "matched_user_id": ids[idx],
+            "score": similarity_scores[i][idx],
+        }
+        for i, idx in enumerate(most_similar_indices.tolist())
     ]
     print(results)
     return {"results": results}
