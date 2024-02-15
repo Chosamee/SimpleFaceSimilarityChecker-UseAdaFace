@@ -103,6 +103,8 @@ async def get_users_with_image(
     files: List[UploadFile] = File(...),
     embeddeds: str = Form(...),
 ):
+    dtype = np.float32  # 원본 배열의 데이터 타입
+    shape = (1, 512)  # 원본 배열의 모양
     # 업로드된 이미지 처리
     uploaded_tensor_inputs = []
     profile_embeddings = []
@@ -118,13 +120,12 @@ async def get_users_with_image(
         internal_id = image.filename.split(".")[0]
         ids.append(internal_id)
         # embedded_profile = db.query(User).filter(User.internal_id == internal_id).first().embedded_profile
-        dtype = np.float32  # 원본 배열의 데이터 타입
-        shape = (1, 512)  # 원본 배열의 모양
-        numpy_array = np.frombuffer(embs[idx], dtype=dtype).reshape(shape)
 
-        # NumPy 배열을 PyTorch 텐서로 변환
-        tensor = torch.from_numpy(numpy_array)
-        profile_embeddings.append(tensor)
+        if embs[idx] is not None:
+            numpy_array = np.frombuffer(embs[idx], dtype=dtype).reshape(shape)
+            # NumPy 배열을 PyTorch 텐서로 변환
+            tensor = torch.from_numpy(numpy_array)
+            profile_embeddings.append(tensor)
     # profile_image_paths = get_profile_image_embeddings(user_ids)
     # for path in profile_image_paths:
     #     embedding = torch.load(path)  # 임베딩 파일 로드
