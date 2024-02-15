@@ -1,3 +1,4 @@
+import base64
 import json
 import pickle
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, Request, Form
@@ -77,7 +78,10 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
     """
     numpy_array = features.numpy()
     binary_data = numpy_array.tobytes()
-    return binary_data
+    encoded_data = base64.b64encode(binary_data).decode("utf-8")
+
+    # Base64 인코딩 문자열을 JSON 응답으로 반환
+    return {"encoded_data": encoded_data}
 
     user = db.query(User).filter(User.internal_id == internal_id).first()
     if not user:
