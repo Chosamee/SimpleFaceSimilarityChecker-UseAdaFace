@@ -149,7 +149,7 @@ async def get_users_with_image(
     # 결과 매핑
     results = [
         {
-            "uploaded_image_name": files[i].filename,
+            "uploaded_user_id": files[i].filename.split(".")[0],
             "uploaded_image_index": i,
             "matched_user_id": ids[idx],
             "score": similarity_scores[i][idx],
@@ -157,7 +157,7 @@ async def get_users_with_image(
         for i, idx in enumerate(most_similar_indices.tolist())
     ]
     print(results)
-    return {"results": results}
+    return {"results": results, "errors": not_found}
 
 
 def run_api():
