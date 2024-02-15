@@ -112,7 +112,6 @@ async def get_users_with_image(
     not_found = []
     decoded_embeddeds = base64.b64decode(embeddeds)
     embs = pickle.loads(decoded_embeddeds)
-    print(embs)
     for idx, image in enumerate(files):
         image_bytes = await image.read()
         tensor_input = preprocess_and_align(image_bytes)
@@ -157,6 +156,7 @@ async def get_users_with_image(
         for i, idx in enumerate(most_similar_indices.tolist())
     ]
     print(results)
+    print(not_found)
     return {"results": results, "errors": not_found}
 
 
