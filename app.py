@@ -151,7 +151,7 @@ async def get_users_with_image(
             "uploaded_user_id": files[i].filename.split(".")[0],
             "uploaded_image_index": i,
             "matched_user_id": ids[idx],
-            "score": similarity_scores[i][idx],
+            "score": similarity_scores[i][idx].item(),
         }
         for i, idx in enumerate(most_similar_indices.tolist())
     ]
