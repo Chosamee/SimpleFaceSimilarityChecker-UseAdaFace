@@ -101,13 +101,14 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
 @app.post("/get_users_with_image")
 async def get_users_with_image(
     files: List[UploadFile] = File(...),
-    emb: bytes = Form(...),
+    embeddeds: str = Form(...),
 ):
     # 업로드된 이미지 처리
     uploaded_tensor_inputs = []
     profile_embeddings = []
     ids = []
-    embs = pickle.loads(emb)
+    decoded_embeddeds = base64.b64decode(embeddeds)
+    embs = pickle.loads(decoded_embeddeds)
     for idx, image in enumerate(files):
         image_bytes = await image.read()
         tensor_input = preprocess_and_align(image_bytes)
