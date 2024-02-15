@@ -101,10 +101,8 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
 @app.post("/get_users_with_image")
 async def get_users_with_image(
     files: List[UploadFile] = File(...),
-    ids_json: str = Form(...),
     emb: bytes = Form(...),
 ):
-    ids = json.loads(ids_json)
     # 업로드된 이미지 처리
     uploaded_tensor_inputs = []
     profile_embeddings = []
