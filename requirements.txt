@@ -9,3 +9,5 @@ facenet_pytorch
 fastapi
 uvicorn
 python-multipart
+dotenv
+pandas

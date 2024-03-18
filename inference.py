@@ -13,9 +13,9 @@ adaface_models = {
 def load_pretrained_model(architecture="ir_50"):
     # load model and pretrained statedict
     assert architecture in adaface_models.keys()
-    # 여기에 파일이 없으면 다운해야줴,,~ 할 수 있음 google drive나 dropbox zenodo 등 링크는 "pretrained/adaface_ir50_ms1mv2.ckpt"
+    # 여기에 파일이 없으면 다운을 하는 코드 넣을 수 있음. google drive나 dropbox zenodo 등 링크는 "pretrained/adaface_ir50_ms1mv2.ckpt"
     model = net.build_model(architecture)
-    statedict = torch.load(adaface_models[architecture], map_location='cpu')["state_dict"]
+    statedict = torch.load(adaface_models[architecture], map_location="cpu")["state_dict"]
     model_statedict = {key[6:]: val for key, val in statedict.items() if key.startswith("model.")}
     model.load_state_dict(model_statedict)
     model.eval()

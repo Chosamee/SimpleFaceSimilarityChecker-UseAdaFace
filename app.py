@@ -34,10 +34,10 @@ app = FastAPI()
 
 model = load_pretrained_model("ir_50")  # 모델을 로드합니다.
 device = torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
-# "cuda:3"을 써야할 수도 있습니다. 할당된 디바이스를 잘 봐야합니다
+# nvidia-smi로 할당된 디바이스를 보고 cuda:{번호} 변경
 
 
-# 이미지를 전처리하고 얼굴을 정렬하는 함수입니다.
+# 이미지를 전처리하고 얼굴을 정렬하는 함수
 def preprocess_and_align(image_bytes):
     image_path = io.BytesIO(image_bytes)
     aligned_rgb_img = align.get_aligned_face(image_path, device)
@@ -50,9 +50,7 @@ def preprocess_and_align(image_bytes):
 
 # 사용자 ID에 따른 프로필 이미지 벡터를 가져오는 함수 (데이터베이스 구현 필요)
 def get_profile_image_embeddings(user_ids):
-    """#TODO
-    아래에 있는 코드는 걍 챗지피티가 준 예시고, 실제로는 user_ids보고 DB의 User 정보에서 embedding을 잘 가져와야합니다.
-
+    """
     input : user_ids
     output : 해당 user의 image의 Embedding Tensor
     """
@@ -73,9 +71,7 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
     with torch.no_grad():
         features, _ = model(tensor_input.unsqueeze(0))  # 이미지가 하나만 있으므로 배치 차원 추가
     print(features)
-    """ #TODO
-    아래에 있는 2줄 코드는 로컬에서 테스트해보려고 작성한거고, 실제로는 DB의 User 정보에 embedding을 잘 저장해둬야 합니다.
-    """
+
     numpy_array = features.numpy()
     binary_data = numpy_array.tobytes()
     encoded_data = base64.b64encode(binary_data).decode("utf-8")
@@ -83,6 +79,9 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
     # Base64 인코딩 문자열을 JSON 응답으로 반환
     return {"encoded_data": encoded_data}
 
+
+"""
+    # DB를 AI서버에서 direct로 이용할 때. "/profile_embedding"에 추가
     user = db.query(User).filter(User.internal_id == internal_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Not found User")
@@ -96,6 +95,7 @@ async def profile_embedding(image: UploadFile = File(...), internal_id: str = Fo
     # 임베딩 벡터를 파일로 저장합니다.
     torch.save(features.squeeze(0), embedding_path)
     return {"embedding": features.squeeze(0).tolist()}  # 임베딩 벡터 반환
+"""
 
 
 @app.post("/get_users_with_image")

@@ -1,9 +1,13 @@
-이재민이 한번 해보면 되는것
+## Check the similarity between many faces<br/> use AdaFace pretrained model.
 
-1. Terminal에 python main.py face_comparison 해보기 (5초 걸릴 예정)
+1. Terminal: python main.py face_comparison
+2. Custom main.py, face_comparison.py, inference.py
 
-2. main.py한번보기(0.3초 걸릴예정)
+<br/>
 
-3. face_comparison.py 한번보기(3초 걸릴예정)
+### Added files
 
-4. 지금 Inference는 2번째로 비슷한 사람을 가져옴(같은 사진도 비교 대상에 포함이 되니까) 알아서 감안
+1. app.py: Communicate with other server with http req/res
+2. database.py: DB initial setting that use sqlalchemy
+3. user.py: DB schema for save data to DB directly from here
+4. test.py: Test file for local
