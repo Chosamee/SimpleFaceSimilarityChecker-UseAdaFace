@@ -11,3 +11,6 @@
 2. database.py: DB initial setting that use sqlalchemy
 3. user.py: DB schema for save data to DB directly from here
 4. test.py: Test file for local
+
+<br/>
+Reference: [AdaFace](https://github.com/mk-minchul/AdaFace)
